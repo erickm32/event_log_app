@@ -155,8 +155,8 @@ class ApiService {
       body = jsonDecode(response.body) as Map<String, dynamic>;
     } catch (_) {}
 
-    // Validation errors: field-keyed hash
-    final fieldErrors = body.values.every((v) => v is List)
+    // Validation errors: field-keyed hash (body must be non-empty to avoid vacuous truth)
+    final fieldErrors = body.isNotEmpty && body.values.every((v) => v is List)
         ? body.map((k, v) => MapEntry(k, (v as List).cast<String>()))
         : null;
 

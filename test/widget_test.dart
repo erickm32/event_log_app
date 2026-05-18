@@ -14,8 +14,9 @@ void main() {
       ),
     );
 
-    expect(find.text('Events'), findsOneWidget);
-    expect(find.text('Categories'), findsOneWidget);
+    // NavigationBar renders each label twice internally in Material 3
+    expect(find.text('Events'), findsAtLeastNWidgets(1));
+    expect(find.text('Categories'), findsAtLeastNWidgets(1));
     expect(find.byType(NavigationBar), findsOneWidget);
   });
 }
