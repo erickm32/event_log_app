@@ -57,6 +57,27 @@ The full OpenAPI spec lives in the Rails project root (`openapi.yml`). To genera
 openapi-generator generate -i ../sidekiqtraining/openapi.yml -g dart-dio -o lib/api
 ```
 
-## Current State
+## Architecture (lib/)
 
-The app is at the Flutter template stage (`lib/main.dart` is the default counter app). No features have been built yet. The next step is scaffolding the actual UI against the API contract above.
+```
+lib/
+  models/        # Event, Category — fromJson/toJson only, no logic
+  services/      # ApiService — all HTTP calls, throws ApiException on errors
+  screens/       # One file per screen, thin widgets that call services
+  main.dart      # App shell with BottomNavigationBar (Events | Categories)
+```
+
+`ApiService` is instantiated once and passed down via `Provider`. Screens never call `http` directly — always through `ApiService`.
+
+For Android emulator, use `http://10.0.2.2:5000` as base URL (emulator loopback to host). For a physical device or deployed API, swap the constant in `lib/services/api_service.dart`.
+
+## Development Plan
+
+| Level | Focus | Status |
+|-------|-------|--------|
+| 1 | Infrastructure: models, ApiService, app shell with bottom nav | ✅ Done |
+| 2 | Events list screen — `GET /api/events`, status chips, loading/empty states | — |
+| 3 | Create event — `POST /api/events`, form validation, inline API errors | — |
+| 4 | Status polling — `Timer.periodic` on event detail after creation | — |
+| 5 | Full CRUD — edit/delete events, categories screen | — |
+| 6 | Riverpod migration — `AsyncNotifierProvider`, invalidate on mutation | — |
