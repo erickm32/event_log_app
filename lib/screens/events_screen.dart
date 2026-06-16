@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/event.dart';
 import '../services/api_service.dart';
 import '../widgets/event_tile.dart';
+import 'create_event_screen.dart';
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});
@@ -42,6 +43,21 @@ class _EventsScreenState extends State<EventsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Events')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final messenger = ScaffoldMessenger.of(context);
+          final created = await Navigator.of(context).push<bool>(
+            MaterialPageRoute(builder: (_) => const CreateEventScreen()),
+          );
+          if (created == true) {
+            _load();
+            messenger.showSnackBar(
+              const SnackBar(content: Text('Event created successfully!')),
+            );
+          }
+        },
+        child: const Icon(Icons.add),
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(

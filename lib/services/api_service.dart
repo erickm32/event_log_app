@@ -11,7 +11,7 @@ const _baseUrl = 'http://10.0.2.2:5000/api';
 class ApiException implements Exception {
   final String message;
   final int statusCode;
-  final Map<String, dynamic>? fieldErrors;
+  final Map<String, List<String>>? fieldErrors;
 
   ApiException({
     required this.message,
