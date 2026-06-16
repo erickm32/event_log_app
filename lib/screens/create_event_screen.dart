@@ -67,14 +67,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
     setState(() => _submitting = true);
     try {
-      await context.read<ApiService>().createEvent(
+      final event = await context.read<ApiService>().createEvent(
             name: _nameController.text.trim(),
             categoryId: _selectedCategoryId,
             observation: _observationController.text.trim().isEmpty
                 ? null
                 : _observationController.text.trim(),
           );
-      if (mounted) Navigator.of(context).pop(true);
+      if (mounted) Navigator.of(context).pop(event);
     } on ApiException catch (e) {
       if (!mounted) return;
       if (e.fieldErrors != null) {

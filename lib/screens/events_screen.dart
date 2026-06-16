@@ -5,6 +5,7 @@ import '../models/event.dart';
 import '../services/api_service.dart';
 import '../widgets/event_tile.dart';
 import 'create_event_screen.dart';
+import 'event_detail_screen.dart';
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});
@@ -26,7 +27,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
   Future<void> _load() async {
     setState(() {
-      _loading = _events == null; // spinner only on first load
+      _loading = _events == null;
       _error = null;
     });
     try {
@@ -39,6 +40,13 @@ class _EventsScreenState extends State<EventsScreen> {
     }
   }
 
+  Future<void> _openDetail(Event event) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+    );
+    if (mounted) _load();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,14 +54,14 @@ class _EventsScreenState extends State<EventsScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final messenger = ScaffoldMessenger.of(context);
-          final created = await Navigator.of(context).push<bool>(
+          final event = await Navigator.of(context).push<Event>(
             MaterialPageRoute(builder: (_) => const CreateEventScreen()),
           );
-          if (created == true) {
-            _load();
+          if (event != null && mounted) {
             messenger.showSnackBar(
               const SnackBar(content: Text('Event created successfully!')),
             );
+            await _openDetail(event);
           }
         },
         child: const Icon(Icons.add),
@@ -69,8 +77,10 @@ class _EventsScreenState extends State<EventsScreen> {
                       : ListView.separated(
                           itemCount: _events!.length,
                           separatorBuilder: (_, _) => const Divider(height: 1),
-                          itemBuilder: (context, i) =>
-                              EventTile(event: _events![i]),
+                          itemBuilder: (context, i) => EventTile(
+                            event: _events![i],
+                            onTap: () => _openDetail(_events![i]),
+                          ),
                         ),
             ),
     );
