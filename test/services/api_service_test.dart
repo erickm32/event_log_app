@@ -53,6 +53,20 @@ void main() {
       expect(event.id, 2);
       expect(event.status, 'pending');
     });
+
+    test('createCategory parses response on 200 (Rails default)', () async {
+      final service = ApiService(
+        client: MockClient((_) async => http.Response(
+              jsonEncode({'id': 3, 'name': 'Health'}),
+              200,
+            )),
+      );
+
+      final category = await service.createCategory(name: 'Health');
+
+      expect(category.id, 3);
+      expect(category.name, 'Health');
+    });
   });
 
   group('ApiService — error paths', () {

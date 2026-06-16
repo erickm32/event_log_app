@@ -121,7 +121,7 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'category': {'name': name}}),
     );
-    _assertOk(response, expected: 201);
+    _assertOk(response);
     return Category.fromJson(
         jsonDecode(response.body) as Map<String, dynamic>);
   }
