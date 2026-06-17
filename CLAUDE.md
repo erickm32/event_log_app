@@ -76,8 +76,9 @@ For Android emulator, use `http://10.0.2.2:5000` as base URL (emulator loopback 
 | Level | Focus | Status |
 |-------|-------|--------|
 | 1 | Infrastructure: models, ApiService, app shell with bottom nav | ✅ Done |
-| 2 | Events list screen — `GET /api/events`, status chips, loading/empty states | — |
-| 3 | Create event — `POST /api/events`, form validation, inline API errors | — |
-| 4 | Status polling — `Timer.periodic` on event detail after creation | — |
-| 5 | Full CRUD — edit/delete events, categories screen | — |
-| 6 | Riverpod migration — `AsyncNotifierProvider`, invalidate on mutation | — |
+| 2 | Events list screen — `GET /api/events`, status chips, loading/empty states | ✅ Done |
+| 3 | Create event — `POST /api/events`, form validation, inline API errors | ✅ Done |
+| 4 | Categories CRUD — list, create, edit, delete (blocked delete handling) | ✅ Done |
+| 5 | Status polling — `Timer.periodic` on event detail after creation | ✅ Done |
+| 6 | Events CRUD — edit, delete | — |
+| 7 | Riverpod migration — `AsyncNotifierProvider`, invalidate on mutation | — |

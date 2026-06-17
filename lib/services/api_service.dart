@@ -11,7 +11,7 @@ const _baseUrl = 'http://10.0.2.2:5000/api';
 class ApiException implements Exception {
   final String message;
   final int statusCode;
-  final Map<String, dynamic>? fieldErrors;
+  final Map<String, List<String>>? fieldErrors;
 
   ApiException({
     required this.message,
@@ -121,7 +121,7 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'category': {'name': name}}),
     );
-    _assertOk(response, expected: 201);
+    _assertOk(response);
     return Category.fromJson(
         jsonDecode(response.body) as Map<String, dynamic>);
   }
