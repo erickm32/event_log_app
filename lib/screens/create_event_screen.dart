@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/category.dart';
+import '../models/event.dart';
 import '../services/api_service.dart';
 
 class CreateEventScreen extends StatefulWidget {
-  const CreateEventScreen({super.key});
+  final Event? event; // null = create mode, non-null = edit mode
+
+  const CreateEventScreen({super.key, this.event});
 
   @override
   State<CreateEventScreen> createState() => _CreateEventScreenState();
@@ -13,8 +16,8 @@ class CreateEventScreen extends StatefulWidget {
 
 class _CreateEventScreenState extends State<CreateEventScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _observationController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _observationController;
 
   // null = still loading, [] = loaded (possibly empty after an error)
   List<Category>? _categories;
@@ -22,9 +25,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   Map<String, List<String>> _fieldErrors = {};
   bool _submitting = false;
 
+  bool get _isEditing => widget.event != null;
+
   @override
   void initState() {
     super.initState();
+    _nameController = TextEditingController(text: widget.event?.name ?? '');
+    _observationController =
+        TextEditingController(text: widget.event?.observation ?? '');
+    _selectedCategoryId = widget.event?.categoryId;
     _loadCategories();
   }
 
@@ -66,14 +75,23 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _submitting = true);
+    final api = context.read<ApiService>();
     try {
-      final event = await context.read<ApiService>().createEvent(
-            name: _nameController.text.trim(),
-            categoryId: _selectedCategoryId,
-            observation: _observationController.text.trim().isEmpty
-                ? null
-                : _observationController.text.trim(),
-          );
+      final observation = _observationController.text.trim().isEmpty
+          ? null
+          : _observationController.text.trim();
+      final event = _isEditing
+          ? await api.updateEvent(
+                widget.event!.id,
+                name: _nameController.text.trim(),
+                categoryId: _selectedCategoryId,
+                observation: observation,
+              )
+          : await api.createEvent(
+                name: _nameController.text.trim(),
+                categoryId: _selectedCategoryId,
+                observation: observation,
+              );
       if (mounted) Navigator.of(context).pop(event);
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -105,7 +123,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('New Event')),
+      appBar: AppBar(title: Text(_isEditing ? 'Edit Event' : 'New Event')),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -187,7 +205,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Create Event'),
+                  : Text(_isEditing ? 'Save' : 'Create Event'),
             ),
           ],
         ),

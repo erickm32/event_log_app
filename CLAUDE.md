@@ -80,5 +80,5 @@ For Android emulator, use `http://10.0.2.2:5000` as base URL (emulator loopback 
 | 3 | Create event — `POST /api/events`, form validation, inline API errors | ✅ Done |
 | 4 | Categories CRUD — list, create, edit, delete (blocked delete handling) | ✅ Done |
 | 5 | Status polling — `Timer.periodic` on event detail after creation | ✅ Done |
-| 6 | Events CRUD — edit, delete | — |
+| 6 | Events CRUD — edit, delete | ✅ Done |
 | 7 | Riverpod migration — `AsyncNotifierProvider`, invalidate on mutation | — |
