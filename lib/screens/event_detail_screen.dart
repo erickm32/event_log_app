@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/event.dart';
 import '../services/api_service.dart';
 import '../widgets/status_chip.dart';
+import 'create_event_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final Event event;
@@ -42,6 +43,54 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     _timer = Timer.periodic(_pollInterval, (_) => _poll());
   }
 
+  Future<void> _openEditForm() async {
+    final updated = await Navigator.of(context).push<Event>(
+      MaterialPageRoute(
+        builder: (_) => CreateEventScreen(event: _event),
+      ),
+    );
+    if (updated != null && mounted) {
+      setState(() => _event = updated);
+    }
+  }
+
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete event?'),
+        content: Text('"${_event.name}" will be permanently deleted.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    try {
+      await context.read<ApiService>().deleteEvent(_event.id);
+      navigator.pop();
+    } on ApiException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Could not reach the server.')),
+      );
+    }
+  }
+
   Future<void> _poll() async {
     try {
       final updated = await context.read<ApiService>().getEvent(_event.id);
@@ -65,6 +114,35 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_event.name),
+        actions: [
+          PopupMenuButton<_Action>(
+            onSelected: (action) {
+              if (action == _Action.edit) {
+                _openEditForm();
+              } else {
+                _confirmDelete();
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: _Action.edit,
+                child: ListTile(
+                  leading: Icon(Icons.edit_outlined),
+                  title: Text('Edit'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              PopupMenuItem(
+                value: _Action.delete,
+                child: ListTile(
+                  leading: Icon(Icons.delete_outline),
+                  title: Text('Delete'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+        ],
         bottom: _isPolling
             ? const PreferredSize(
                 preferredSize: Size.fromHeight(4),
@@ -123,6 +201,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   String _pad(int n) => n.toString().padLeft(2, '0');
 }
+
+enum _Action { edit, delete }
 
 class _DetailTile extends StatelessWidget {
   final IconData icon;
